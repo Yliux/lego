@@ -1,4 +1,4 @@
-# 🎨 Step 1 - Craft your conviction
+# 🎨 Step 0 - Craft your conviction
 
 > How to explain your understanding and why you created all of your design?
 
