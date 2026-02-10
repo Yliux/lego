@@ -66,8 +66,13 @@ console.log('TODO 2: Number of deals:', numberOfDeals);
 // 3. Log how many shopping communities we have
 
 // 1. Create a variable and assign it the list of shopping community name only
-// On utilise un Set pour éviter les doublons
-const communityNames = [...new Set(deals.map(deal => deal.community))];
+// On utilise une boucle pour éviter les doublons
+const communityNames = [];
+for (const deal of deals) {
+  if (!communityNames.includes(deal.community)) {
+    communityNames.push(deal.community);
+  }
+}
 // 2. Log the variable
 console.log('TODO 3: Community names:', communityNames);
 // 3. Log how many shopping communities we have
@@ -90,15 +95,25 @@ console.log('TODO 4: Deals sorted by price (low to high):', dealsByPrice);
 // 1. Create a function to sort the deals by date
 // 2. Create a variable and assign it the list of deals by date from recent to old
 // 3. Log the variable
+// Fonction utilitaire pour convertir n'importe quel format de date en timestamp (millisecondes)
+const getDealTimestamp = (deal) => {
+  // Si c'est un nombre (Dealabs), c'est des secondes => on multiplie par 1000 pour avoir des millisecondes
+  if (typeof deal.published === 'number') {
+    return deal.published * 1000;
+  }
+  // Si c'est une chaîne (Avenue de la brique), on laisse l'objet Date le parser
+  return new Date(deal.published).getTime();
+};
 
+// 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
-// Published est un timestamp dans data.js (ex: 1769939931), donc on peut soustraire directement
-const sortByDateDesc = (a, b) => b.published - a.published;
+const sortByDateDesc = (a, b) => getDealTimestamp(b) - getDealTimestamp(a);
+
 // 2. Create a variable and assign it the list of deals by date from recent to old
 const dealsByDate = [...deals].sort(sortByDateDesc);
+
 // 3. Log the variable
 console.log('TODO 5: Deals sorted by date (recent to old):', dealsByDate);
-
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 // 2. Log the list
@@ -142,13 +157,46 @@ console.log('TODO 7: Average discount:', averageDiscount.toFixed(2) + '%');
 // 2. Log the variable
 // 3. Log the number of deals by community
 
+// 1. Create an object called `communities` to manipulate deals by community name
+const communities = {};
+for (const deal of deals) {
+  const name = deal.community;
+  if (!communities[name]) {
+    communities[name] = [];
+  }
+  communities[name].push(deal);
+}
+// 2. Log the variable
+console.log('TODO 8: Communities object:', communities);
+// 3. Log the number of deals by community
+for (const name in communities) {
+  console.log(`TODO 8: ${name} has ${communities[name].length} deals`);
+}
+
 // 🎯 TODO 9: Sort by price for each community
 // 1. For each community, sort the deals by discount price, from highest to lowest
 // 2. Log the sort
 
+// 1. For each community, sort the deals by discount price, from highest to lowest
+// Note: "discount price" est interprété ici comme le prix final (price). Highest to lowest = descendant.
+for (const name in communities) {
+  communities[name].sort((a, b) => b.price - a.price);
+}
+// 2. Log the sort
+console.log('TODO 9: Communities sorted by price (high to low):', communities);
+
 // 🎯 TODO 10: Sort by date for each community
 // 1. For each set, sort the deals by date, from old to recent
 // 2. Log the sort
+
+// 🎯 TODO 10: Sort by date for each community
+// 1. For each set, sort the deals by date, from old to recent
+for (const name in communities) {
+  // "Old to recent" = Ascendant (a - b)
+  communities[name].sort((a, b) => getDealTimestamp(a) - getDealTimestamp(b));
+}
+// 2. Log the sort
+console.log('TODO 10: Communities sorted by date (old to recent):', communities);
 
 
 /**
@@ -442,13 +490,49 @@ const VINTED = [
 // 3. Compute the p25 price value of the listing
 // The p25 value (25th percentile) is the lower value expected to be exceeded in 25% of the vinted items
 
+// 1. Compute the average price value of the listing
+// Attention : les prix dans VINTED sont des chaînes de caractères ("price": "48.99"), il faut les convertir.
+const vintedPrices = VINTED.map(item => parseFloat(item.price)).sort((a, b) => a - b);
+const avgVinted = vintedPrices.reduce((acc, price) => acc + price, 0) / vintedPrices.length;
+
+// Helper function for percentiles
+const getPercentile = (data, percentile) => {
+  const index = (percentile / 100) * (data.length - 1);
+  const lower = Math.floor(index);
+  // Simple implementation taking the floor value or interpolation could be used
+  return data[lower]; 
+};
+
+// 2. Compute the p5 price value
+const p5 = getPercentile(vintedPrices, 5);
+// 3. Compute the p25 price value
+const p25 = getPercentile(vintedPrices, 25);
+
+console.log(`TODO 11: Vinted Avg: ${avgVinted.toFixed(2)}, P5: ${p5}, P25: ${p25}`);
+
 // 🎯 TODO 12: Very old listed items
 // // 1. Log if we have very old items (true or false)
 // // A very old item is an item `published` more than 3 weeks ago.
 
+// 1. Log if we have very old items (true or false)
+// A very old item is an item `published` more than 3 weeks ago.
+const THREE_WEEKS = 3 * 7 * 24 * 60 * 60 * 1000;
+const now = Date.now(); // Date actuelle
+const hasVeryOld = VINTED.some(item => {
+  const publishDate = new Date(item.published).getTime();
+  return (now - publishDate) > THREE_WEEKS;
+});
+console.log('TODO 12: Has very old items?', hasVeryOld);
+
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
+
+// 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
+const targetUuid = 'f2c5377c-84f9-571d-8712-98902dcbb913';
+const foundItem = VINTED.find(item => item.uuid === targetUuid);
+// 2. Log the item
+console.log('TODO 13: Found item:', foundItem);
 
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
