@@ -537,9 +537,15 @@ console.log('TODO 13: Found item:', foundItem);
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
+// 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
+// On utilise filter pour créer une nouvelle liste sans l'élément
+const vintedFiltered = VINTED.filter(item => item.uuid !== targetUuid);
+// 2. Log the new list of items
+console.log(`TODO 14: Items remaining: ${vintedFiltered.length} (Original: ${VINTED.length})`);
 
-// 🎯 TODO 5: Save a favorite item
-// We declare and assign a variable called `sealedCamera`
+// 🎯 TODO 15: Save a favorite item
+
+// 1. We declare and assign a variable called `sealedCamera`
 let sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
   price: "131.95",
@@ -548,16 +554,16 @@ let sealedCamera = {
   uuid: "18751705-536e-5c1f-9a9d-383a3a629df5"
 };
 
-// we make a copy of `sealedCamera` to `camera` variable
-// and set a new property `favorite` to true
+// 2. We make a copy of `sealedCamera` to `camera` variable
+// ATTENTION : Ici, on copie la RÉFÉRENCE, pas l'objet. Les deux variables pointent vers le même endroit en mémoire.
 let camera = sealedCamera;
-
 camera.favorite = true;
 
-// 1. Log `sealedCamera` and `camera` variables
-// 2. What do you notice?
+console.log("TODO 15: --- Test par Référence ---");
+console.log("Sealed (original) a changé :", sealedCamera.favorite); // Affiche true (Aïe !)
+console.log("Camera (copie) a changé :", camera.favorite);       // Affiche true
 
-// we make (again) a new assignment again
+// 3. We make (again) a new assignment again to reset the object
 sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
   price: "131.95",
@@ -566,7 +572,15 @@ sealedCamera = {
   uuid: "18751705-536e-5c1f-9a9d-383a3a629df5"
 };
 
-// 3. Update `camera` property with `favorite` to true WITHOUT changing sealedCamera properties
+// 4. Update `camera` property with `favorite` to true WITHOUT changing sealedCamera properties
+// SOLUTION : On utilise le "Spread Operator" (...) pour créer une copie superficielle (shallow copy)
+camera = { ...sealedCamera, favorite: true };
+
+console.log("--- Test par Copie (Spread Operator) ---");
+console.log("Sealed (original) est intact :", sealedCamera.favorite); // Affiche undefined (Super !)
+console.log("Camera (copie) a la propriété :", camera.favorite);      // Affiche true
+
+
 
 
 // 🎯 TODO 11: Compute the profitability
@@ -581,7 +595,11 @@ const deal = {
 // 1. Compute the potential highest profitability based on the VINTED items
 // 2. Log the value
 
+const maxVintedPrice = vintedPrices[vintedPrices.length - 1];
+const profitability = maxVintedPrice - deal.price;
 
+// 2. Log the value
+console.log(`TODO 16: Max Profitability: ${profitability.toFixed(2)} € (Sell at ${maxVintedPrice} - Buy at ${deal.price})`);
 
 /**
  * 🎬
@@ -592,3 +610,12 @@ const deal = {
 // 🎯 LAST TODO: Save in localStorage
 // 1. Save MY_FAVORITE_DEALERS in the localStorage
 // 2. log the localStorage
+// 1. Save MY_FAVORITE_DEALERS in the localStorage
+// localStorage n'accepte que des chaînes de caractères, on utilise JSON.stringify
+if (typeof localStorage !== 'undefined') {
+  localStorage.setItem('my_favorite_dealers', JSON.stringify(MY_FAVORITE_DEALERS));
+  // 2. log the localStorage
+  console.log('LAST TODO: localStorage item:', localStorage.getItem('my_favorite_dealers'));
+} else {
+  console.log('LAST TODO: localStorage is not available in this environment.');
+}
