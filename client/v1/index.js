@@ -30,6 +30,18 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 1. Create a new variable and assign it the link of the lego set with the highest reduction I can find on these 2 websites
 // 2. Log the variable
 
+// 1. Create a new variable and assign it the link of the lego set with the highest reduction
+// On cherche la réduction (discount) la plus élevée dans la liste 'deals' (chargée via data.js)
+let bestDeal = deals[0];
+for (const deal of deals) {
+  if (deal.discount > bestDeal.discount) {
+    bestDeal = deal;
+  }
+}
+const bestDealLink = bestDeal.link;
+// 2. Log the variable
+console.log(`TODO 1: Highest reduction link (${bestDeal.discount}%):`, bestDealLink);
+
 /**
  * 🧱
  * Easy 😁?
@@ -43,28 +55,69 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 1. Create a variable and assign it the number of deals
 // 2. Log the variable
 
+// 1. Create a variable and assign it the number of deals
+const numberOfDeals = deals.length;
+// 2. Log the variable
+console.log('TODO 2: Number of deals:', numberOfDeals);
+
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
 // 2. Log the variable
 // 3. Log how many shopping communities we have
+
+// 1. Create a variable and assign it the list of shopping community name only
+// On utilise un Set pour éviter les doublons
+const communityNames = [...new Set(deals.map(deal => deal.community))];
+// 2. Log the variable
+console.log('TODO 3: Community names:', communityNames);
+// 3. Log how many shopping communities we have
+console.log('TODO 3: Count of communities:', communityNames.length);
 
 // 🎯 TODO 4: Sort by price
 // 1. Create a function to sort the deals by price
 // 2. Create a variable and assign it the list of sets by price from lowest to highest
 // 3. Log the variable
 
+// 1. Create a function to sort the deals by price
+const sortByPriceAsc = (a, b) => a.price - b.price;
+// 2. Create a variable and assign it the list of sets by price from lowest to highest
+// On utilise [...deals] pour créer une copie et ne pas modifier le tableau original tout de suite
+const dealsByPrice = [...deals].sort(sortByPriceAsc);
+// 3. Log the variable
+console.log('TODO 4: Deals sorted by price (low to high):', dealsByPrice);
+
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
 // 2. Create a variable and assign it the list of deals by date from recent to old
 // 3. Log the variable
 
+// 1. Create a function to sort the deals by date
+// Published est un timestamp dans data.js (ex: 1769939931), donc on peut soustraire directement
+const sortByDateDesc = (a, b) => b.published - a.published;
+// 2. Create a variable and assign it the list of deals by date from recent to old
+const dealsByDate = [...deals].sort(sortByDateDesc);
+// 3. Log the variable
+console.log('TODO 5: Deals sorted by date (recent to old):', dealsByDate);
+
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 // 2. Log the list
 
+// 1. Filter the list of deals between 50% and 75%
+const interestingDeals = deals.filter(deal => deal.discount >= 50 && deal.discount <= 75);
+// 2. Log the list
+console.log('TODO 6: Deals with 50-75% discount:', interestingDeals);
+
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
 // 2. Log the average
+// 1. Determine the average percentage discount of the deals
+// On filtre d'abord les deals qui ont une réduction valide (au cas où il y ait des null)
+const validDiscounts = deals.filter(d => d.discount != null);
+const totalDiscount = validDiscounts.reduce((acc, deal) => acc + deal.discount, 0);
+const averageDiscount = totalDiscount / validDiscounts.length;
+// 2. Log the average
+console.log('TODO 7: Average discount:', averageDiscount.toFixed(2) + '%');
 
 /**
  * 🏎
