@@ -65,8 +65,7 @@ console.log('TODO 2: Number of deals:', numberOfDeals);
 // 2. Log the variable
 // 3. Log how many shopping communities we have
 
-// 1. Create a variable and assign it the list of shopping community name only
-// On utilise une boucle pour éviter les doublons
+
 const communityNames = [];
 for (const deal of deals) {
   if (!communityNames.includes(deal.community)) {
@@ -114,12 +113,17 @@ const dealsByDate = [...deals].sort(sortByDateDesc);
 
 // 3. Log the variable
 console.log('TODO 5: Deals sorted by date (recent to old):', dealsByDate);
+
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 // 2. Log the list
 
 // 1. Filter the list of deals between 50% and 75%
-const interestingDeals = deals.filter(deal => deal.discount >= 50 && deal.discount <= 75);
+const min = 50;
+const max = 75;
+const interestingDeals = deals.filter(function(deal) {
+  return deal.discount >= min && deal.discount <= max;
+});
 // 2. Log the list
 console.log('TODO 6: Deals with 50-75% discount:', interestingDeals);
 
