@@ -1,11 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>🧱 Lego | Predictability of a lego set deal</title>
+    <style>
+      /* FEATURE 15 : Usable and pleasant UX */
+      body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        margin: 0;
+        padding: 30px;
+        line-height: 1.6;
+      }
+      h1 { font-size: 2.5rem; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; display: inline-block; }
+      h2 { color: #2c3e50; font-size: 1.5rem; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; margin-top: 0; }
+      section {
+        background: #ffffff;
+        padding: 25px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      }
+      /* Options & Controls */
+      #options { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+      select { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; }
+      #filters { display: flex; gap: 15px; }
+      #filters span {
+        background-color: #ecf0f1; padding: 8px 15px; border-radius: 20px;
+        color: #2980b9; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+        transition: all 0.2s ease;
+      }
+      #filters span:hover { background-color: #3498db; color: white; }
+      
+      /* Indicators */
+      #indicators-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+      }
+      .indicator-card {
+        background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e9ecef;
+      }
+      .indicator-card span:first-child { display: block; font-size: 0.85rem; color: #6c757d; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+      .indicator-card span:last-child { font-size: 1.8rem; font-weight: bold; color: #e74c3c; }
+      
+      /* Grids for Deals and Sales */
+      .cards-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+      }
+      .deal-card, .sale-card {
+        background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px;
+        display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s, box-shadow 0.2s; position: relative;
+      }
+      .deal-card:hover, .sale-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+      .deal-card span.id-badge { background: #34495e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; align-self: flex-start; }
+      .deal-card a, .sale-card a { color: #2980b9; text-decoration: none; font-weight: 600; font-size: 1.1rem; line-height: 1.3; }
+      .deal-card a:hover, .sale-card a:hover { text-decoration: underline; color: #1abc9c; }
+      .deal-card .price { font-size: 1.4rem; font-weight: bold; color: #27ae60; margin-top: auto; }
+      
+      /* Favorite Button */
+      .fav-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; user-select: none; transition: transform 0.2s; }
+      .fav-btn:hover { transform: scale(1.2); }
+    </style>
   </head>
   <body>
-    <h1>Lego</h1>
+    <h1>Lego Analytics</h1>
+    
     <section id="options">
       <div id="show">
         <label for="show-select">Show:</label>
@@ -19,11 +80,6 @@
         <label for="page-select">Go to page:</label>
         <select name="page" id="page-select"> </select>
       </div>
-      <div id="filters">
-        <span>By best discount</span>
-        <span>By most commented</span>
-        <span>By hot deals</span>
-      </div>
       <div id="sort">
         <label for="sort-select">Sort:</label>
         <select name="sort" id="sort-select">
@@ -33,7 +89,13 @@
           <option value="date-desc">Anciently published</option>
         </select>
       </div>
+      <div id="filters">
+        <span>Best discount</span>
+        <span>Most commented</span>
+        <span>Hot deals</span>
+        <span>By favorites ❤️</span> </div>
     </section>
+
     <section id="lego">
       <h2>Lego sets</h2>
       <div>
@@ -41,41 +103,26 @@
         <select id="lego-set-id-select"></select> 
       </div>
     </section>
+
     <section id="indicators">
       <h2>Indicators</h2>
-      <div>
-        <span>Number of deals</span>
-        <span id="nbDeals">0</span>
-      </div>
-      <div>
-        <span>Number of sales</span>
-        <span id="nbSales">0</span>
-      </div>
-      <div>
-        <span>Average sales price value</span>
-        <span id="averageSales">0</span>
-      </div>
-      <div>
-        <span>p5 sales price value</span>
-        <span>0</span>
-      </div>
-      <div>
-        <span>p25 sales price value</span>
-        <span>0</span>
-      </div>
-      <div>
-        <span>p50 sales price value</span>
-        <span>0</span>
-      </div>
-      <div>
-        <span>Lifetime value</span>
-        <span>10 days</span>
-      </div>
+      <div id="indicators-grid">
+        <div class="indicator-card"><span>Deals</span><span id="nbDeals">0</span></div>
+        <div class="indicator-card"><span>Sales</span><span id="nbSales">0</span></div>
+        <div class="indicator-card"><span>Average Price</span><span id="averageSales">0</span></div>
+        <div class="indicator-card"><span>p5 Price</span><span id="p5Value">0</span></div>
+        <div class="indicator-card"><span>p25 Price</span><span id="p25Value">0</span></div>
+        <div class="indicator-card"><span>p50 Price</span><span id="p50Value">0</span></div>
+        <div class="indicator-card"><span>Lifetime</span><span id="lifetimeValue">0 days</span></div> </div>
     </section>
     
-    <section id="deals"></section>
+    <section id="deals">
+      <h2>Deals</h2>
+      </section>
     
-    <section id="sales"></section>
+    <section id="sales">
+      <h2>Sales</h2>
+      </section>
     
     <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
     <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
