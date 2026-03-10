@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "First bricks for profitability",
   "main": "index.js",
-  "repository": "git@github.com:92bondstreet/lego.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/92bondstreet/lego.git"
+  },
   "type": "module",
   "dependencies": {
     "body-parser": "^2.2.2",
@@ -17,5 +20,15 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/92bondstreet/lego/issues"
+  },
+  "homepage": "https://github.com/92bondstreet/lego#readme"
 }
