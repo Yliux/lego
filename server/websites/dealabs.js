@@ -1,9 +1,24 @@
 import * as cheerio from 'cheerio';
 import { v5 as uuidv5 } from 'uuid';
 
-// 🍪 AJOUTE TON COOKIE DEALABS ICI 🍪
-// Remplace "ton_cookie_dealabs_complet_ici" par le vrai cookie récupéré dans ton navigateur
-const COOKIE = "dont-track=0; f_c=1; g_p=1; cookie_policy_agreement=3; view_layout_horizontal=%221-1%22; hide_local=0; time_frame=365; sort_by=%22new%22; hide_expired=1; f_v=%22b954cd2c-d512-11f0-8e9a-0242ac110003%22; show_my_tab=0; browser_push_permission_requested=1769418782; navi=%7B%22homepage%22%3A%22highlights%22%2C%22hottest-widget-time%22%3A%22day%22%7D; pepper_session=%22A1CJBAa1dgWkEszVXapD2cJ098iDhwjt0d6fT6VV%22; u_l=0; xsrf_t=%227UOBkpx4tYnYU3qGlO5PXznA6Mnk0Al5RKmCKJbX%22; l_p_u_t_ts=1773168211";
+// 🍪 N'oublie pas de coller ton vrai cookie Dealabs ici
+const COOKIE = "ton_cookie_dealabs_complet_ici";
+
+// --- FONCTIONS D'AIDE (HELPERS) ---
+
+const formatImage = (mainImage) => {
+  if (!mainImage) return null;
+  return typeof mainImage === 'string' ? mainImage : (mainImage.path || mainImage.url || null);
+};
+
+const extractSetId = (title) => {
+  if (!title) return null;
+  const match = title.match(/\b\d{5}\b/);
+  return match ? match[0] : null;
+};
+
+
+// --- FONCTION DE PARSING ---
 
 /**
  * Parse webpage data response
@@ -11,39 +26,71 @@ const COOKIE = "dont-track=0; f_c=1; g_p=1; cookie_policy_agreement=3; view_layo
  * @return {Array} list of deals
  */
 const parse = data => {
-  const $ = cheerio.load(data);
+  const $ = cheerio.load(data); 
 
-  return $('article.thread')
+  return $('div.js-threadList article')
     .map((i, element) => {
-      // Extraction du lien et du titre
-      const titleElement = $(element).find('strong.thread-title a');
-      const title = titleElement.attr('title') || titleElement.text().trim();
-      const link = titleElement.attr('href');
-      
-      // Extraction du prix
-      const priceText = $(element).find('span.thread-price').text().trim();
-      const price = priceText ? parseFloat(priceText.replace(/[^0-9,.]/g, '').replace(',', '.')) : null;
+      try {
+        // 1. Récupération du lien (grâce à ton super sélecteur !)
+        let link = $(element)
+          .find('a[data-t="threadLink"]')
+          .attr('href');
 
-      // Extraction de la température (hot deals)
-      const tempText = $(element).find('span.cept-vote-temp').text().trim();
-      const temperature = tempText ? parseInt(tempText.replace(/[^0-9-]/g, '')) : 0;
+        if (link && !link.startsWith('http')) {
+          link = `https://www.dealabs.com${link}`;
+        }
 
-      // Extraction du nombre de commentaires
-      const commentsText = $(element).find('span.cept-comment-link').text().trim();
-      const comments = commentsText ? parseInt(commentsText.replace(/[^0-9]/g, '')) : 0;
+        // 2. Récupération du JSON Vue3
+        const vueDataString = $(element)
+          .find('div.js-vue3')
+          .attr('data-vue3');
 
-      return {
-        title,
-        price,
-        temperature,
-        comments,
-        link,
-        uuid: link ? uuidv5(link, uuidv5.URL) : null
-      };
+        if (!vueDataString) return null;
+
+        const vueData = JSON.parse(vueDataString);
+        const thread = vueData.props?.thread;
+
+        if (!thread) return null;
+
+        // 3. Application des variables
+        const retail = thread.nextBestPrice || thread.price; 
+        const price = thread.price;
+        const discount = (retail && price && retail > price) 
+          ? parseInt(((retail - price) / retail) * 100) 
+          : 0;
+        
+        const temperature = +thread.temperature || 0;
+        const photo = formatImage(thread.mainImage);
+        const comments = +thread.commentCount || 0;
+        const published = thread.publishedAt;
+        const title = thread.title;
+        const id = extractSetId(title);
+
+        // 4. Objet final retourné
+        return {
+          id,
+          title,
+          price,
+          retail,
+          discount,
+          temperature,
+          comments,
+          published,
+          photo,
+          link, // <-- Le lien est bien là !
+          uuid: link ? uuidv5(link, uuidv5.URL) : null // <-- L'UUID marchera !
+        };
+
+      } catch (error) {
+        return null; // On ignore les éléments qui plantent
+      }
     })
     .get()
-    .filter(deal => deal.title); // On filtre pour enlever les potentiels articles vides
+    .filter(deal => deal !== null); // On nettoie les potentiels null du tableau
 };
+
+
+// --- FONCTION DE SCRAPING (API) ---
 
 /**
  * Scrape a given url page
@@ -54,7 +101,7 @@ export const scrape = async (url) => {
   try {
     const response = await fetch(url, {
       headers: {
-        'Cookie': COOKIE, // <-- LE COOKIE EST INJECTÉ ICI
+        'Cookie': COOKIE,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
