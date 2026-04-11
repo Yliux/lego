@@ -1,130 +1,325 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>🧱 Lego | Predictability of a lego set deal</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>🧱 Lego Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      /* FEATURE 15 : Usable and pleasant UX */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --red: #E3000B;
+        --red-light: #fff0f0;
+        --red-mid: #ffd6d7;
+        --text: #1a1a1a;
+        --text-muted: #888;
+        --border: #e8e8e8;
+        --bg: #f5f5f5;
+        --white: #ffffff;
+      }
+
       body {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f4f7f6;
-        color: #333;
-        margin: 0;
-        padding: 30px;
-        line-height: 1.6;
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 36px 28px;
       }
-      h1 { font-size: 2.5rem; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; display: inline-block; }
-      h2 { color: #2c3e50; font-size: 1.5rem; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; margin-top: 0; }
-      section {
-        background: #ffffff;
-        padding: 25px;
-        margin-bottom: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+      .page-wrapper { max-width: 1200px; margin: 0 auto; }
+
+      /* ── Header ── */
+      header {
+        display: flex; align-items: center; gap: 12px;
+        margin-bottom: 32px;
+        border-bottom: 2px solid var(--red);
+        padding-bottom: 16px;
       }
-      /* Options & Controls */
-      #options { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
-      select { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; }
-      #filters { display: flex; gap: 15px; }
+
+      .logo-dot {
+        width: 14px; height: 14px;
+        background: var(--red);
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      h1 span { color: var(--red); }
+
+      /* ── Controls bar ── */
+      #options {
+        display: flex; flex-wrap: wrap;
+        align-items: center; gap: 10px;
+        margin-bottom: 24px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+      }
+
+      #options > div { display: flex; align-items: center; gap: 6px; }
+
+      label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      select {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 5px 24px 5px 9px;
+        cursor: pointer; outline: none;
+        -webkit-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        transition: border-color 0.15s;
+      }
+      select:focus { border-color: var(--red); }
+
+      /* ── Filters ── */
+      #filters { display: flex; flex-wrap: wrap; gap: 6px; }
+
       #filters span {
-        background-color: #ecf0f1; padding: 8px 15px; border-radius: 20px;
-        color: #2980b9; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-        transition: all 0.2s ease;
+        padding: 5px 13px;
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        font-size: 0.75rem; font-weight: 500;
+        color: var(--text-muted);
+        background: var(--white);
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
       }
-      #filters span:hover { background-color: #3498db; color: white; }
-      
-      /* Indicators */
-      #indicators-grid {
+      #filters span:hover { border-color: var(--red); color: var(--red); }
+      #filters span.active {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+      }
+
+      /* ── Séparateur visuel ── */
+      .divider { width: 1px; height: 24px; background: var(--border); }
+
+      /* ── Layout principal ── */
+      #main-layout {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
+        grid-template-columns: 1fr 280px;
+        gap: 20px;
+        align-items: start;
       }
-      .indicator-card {
-        background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e9ecef;
+      #left-col, #right-col { display: flex; flex-direction: column; gap: 20px; }
+      @media (max-width: 860px) { #main-layout { grid-template-columns: 1fr; } }
+
+      /* ── Sections ── */
+      section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
       }
-      .indicator-card span:first-child { display: block; font-size: 0.85rem; color: #6c757d; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
-      .indicator-card span:last-child { font-size: 1.8rem; font-weight: bold; color: #e74c3c; }
-      
-      /* Grids for Deals and Sales */
+
+      section h2 {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+
+      /* ── Cards ── */
       .cards-grid {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
       }
+
       .deal-card, .sale-card {
-        background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px;
-        display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s, box-shadow 0.2s; position: relative;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        display: flex; flex-direction: column; gap: 8px;
+        position: relative;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        background: var(--white);
       }
-      .deal-card:hover, .sale-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-      .deal-card span.id-badge { background: #34495e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; align-self: flex-start; }
-      .deal-card a, .sale-card a { color: #2980b9; text-decoration: none; font-weight: 600; font-size: 1.1rem; line-height: 1.3; }
-      .deal-card a:hover, .sale-card a:hover { text-decoration: underline; color: #1abc9c; }
-      .deal-card .price { font-size: 1.4rem; font-weight: bold; color: #27ae60; margin-top: auto; }
-      
-      /* Favorite Button */
-      .fav-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; user-select: none; transition: transform 0.2s; }
+      .deal-card:hover, .sale-card:hover {
+        border-color: var(--red);
+        box-shadow: 0 4px 16px rgba(227,0,11,0.08);
+      }
+
+      .deal-img {
+        width: 100%; height: 130px;
+        object-fit: contain;
+        border-radius: 6px;
+        background: var(--bg);
+      }
+
+      .id-badge {
+        display: inline-block;
+        background: var(--red-light);
+        color: var(--red);
+        border: 1px solid var(--red-mid);
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 0.68rem; font-weight: 600;
+        align-self: flex-start;
+      }
+
+      .discount-badge {
+        display: inline-block;
+        background: var(--red);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 0.68rem; font-weight: 700;
+        align-self: flex-start;
+      }
+
+      .deal-card a, .sale-card a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.8rem;
+        line-height: 1.45;
+        transition: color 0.15s;
+      }
+      .deal-card a:hover, .sale-card a:hover { color: var(--red); }
+
+      .price {
+        font-size: 1rem; font-weight: 700;
+        color: var(--red);
+        margin-top: auto;
+      }
+
+      /* ── Favoris ── */
+      .fav-btn {
+        position: absolute; top: 10px; right: 10px;
+        font-size: 1rem; cursor: pointer;
+        user-select: none;
+        transition: transform 0.2s;
+        line-height: 1;
+      }
       .fav-btn:hover { transform: scale(1.2); }
+
+      /* ── Indicateurs ── */
+      #indicators-grid { display: flex; flex-direction: column; }
+
+      .indicator-card {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .indicator-card:last-child { border-bottom: none; }
+
+      .indicator-card span:first-child {
+        font-size: 0.78rem; color: var(--text-muted); font-weight: 400;
+      }
+      .indicator-card span:last-child {
+        font-size: 0.88rem; font-weight: 700; color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ── Set selector ── */
+      #lego > div { display: flex; align-items: center; gap: 8px; }
+      #lego-set-id-select { flex: 1; }
     </style>
   </head>
   <body>
-    <h1>Lego Analytics</h1>
-    
-    <section id="options">
-      <div id="show">
-        <label for="show-select">Show:</label>
-        <select name="show" id="show-select">
-          <option value="6">6</option>
-          <option value="12">12</option>
-          <option value="24">24</option>
-        </select>
-      </div>
-      <div id="page">
-        <label for="page-select">Go to page:</label>
-        <select name="page" id="page-select"> </select>
-      </div>
-      <div id="sort">
-        <label for="sort-select">Sort:</label>
-        <select name="sort" id="sort-select">
-          <option value="price-asc">Cheaper</option>
-          <option value="price-desc">Expensive</option>
-          <option value="date-asc">Recently published</option>
-          <option value="date-desc">Anciently published</option>
-        </select>
-      </div>
-      <div id="filters">
-        <span>Best discount</span>
-        <span>Most commented</span>
-        <span>Hot deals</span>
-        <span>By favorites ❤️</span> </div>
-    </section>
+    <div class="page-wrapper">
 
-    <section id="lego">
-      <h2>Lego sets</h2>
-      <div>
-        <label>Lego set id:</label>
-        <select id="lego-set-id-select"></select> 
-      </div>
-    </section>
+      <header>
+        <div class="logo-dot"></div>
+        <h1>Lego <span>Analytics</span></h1>
+      </header>
 
-    <section id="indicators">
-      <h2>Indicators</h2>
-      <div id="indicators-grid">
-        <div class="indicator-card"><span>Deals</span><span id="nbDeals">0</span></div>
-        <div class="indicator-card"><span>Sales</span><span id="nbSales">0</span></div>
-        <div class="indicator-card"><span>Average Price</span><span id="averageSales">0</span></div>
-        <div class="indicator-card"><span>p5 Price</span><span id="p5Value">0</span></div>
-        <div class="indicator-card"><span>p25 Price</span><span id="p25Value">0</span></div>
-        <div class="indicator-card"><span>p50 Price</span><span id="p50Value">0</span></div>
-        <div class="indicator-card"><span>Lifetime</span><span id="lifetimeValue">0 days</span></div> </div>
-    </section>
-    
-    <section id="deals">
-      <h2>Deals</h2>
+      <!-- Controls -->
+      <section id="options">
+        <div id="show">
+          <label for="show-select">Afficher</label>
+          <select id="show-select">
+            <option value="6">6</option>
+            <option value="12" selected>12</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+        <div id="page">
+          <label for="page-select">Page</label>
+          <select id="page-select"></select>
+        </div>
+        <div class="divider"></div>
+        <div id="sort">
+          <label for="sort-select">Trier</label>
+          <select id="sort-select">
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+            <option value="date-asc">Plus récent</option>
+            <option value="date-desc">Plus ancien</option>
+          </select>
+        </div>
+        <div class="divider"></div>
+        <div id="filters">
+          <span>Meilleure remise</span>
+          <span>Plus commentés</span>
+          <span>Hot deals</span>
+          <span>Favoris ❤️</span>
+        </div>
       </section>
-    
-    <section id="sales">
-      <h2>Sales</h2>
-      </section>
-    
-    <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
+
+      <div id="main-layout">
+
+        <div id="left-col">
+          <section id="deals">
+            <h2>Deals</h2>
+          </section>
+          <section id="sales">
+            <h2>Ventes Vinted</h2>
+          </section>
+        </div>
+
+        <div id="right-col">
+          <section id="lego">
+            <h2>Set Lego</h2>
+            <div>
+              <label>ID</label>
+              <select id="lego-set-id-select"></select>
+            </div>
+          </section>
+
+          <section id="indicators">
+            <h2>Indicateurs</h2>
+            <div id="indicators-grid">
+              <div class="indicator-card"><span>Deals</span><span id="nbDeals">—</span></div>
+              <div class="indicator-card"><span>Ventes</span><span id="nbSales">—</span></div>
+              <div class="indicator-card"><span>Prix moyen</span><span id="averageSales">—</span></div>
+              <div class="indicator-card"><span>p5</span><span id="p5Value">—</span></div>
+              <div class="indicator-card"><span>p25</span><span id="p25Value">—</span></div>
+              <div class="indicator-card"><span>p50</span><span id="p50Value">—</span></div>
+              <div class="indicator-card"><span>Durée de vie</span><span id="lifetimeValue">—</span></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="portfolio.js"></script>
   </body>
 </html>

@@ -1,8 +1,7 @@
 import * as cheerio from 'cheerio';
 import { v5 as uuidv5 } from 'uuid';
 
-// 🍪 N'oublie pas de coller ton vrai cookie Dealabs ici
-const COOKIE = "ton_cookie_dealabs_complet_ici";
+const COOKIE = "dont-track=0; f_c=1; g_p=1; cookie_policy_agreement=3; view_layout_horizontal=%221-1%22; hide_local=0; time_frame=365; sort_by=%22new%22; hide_expired=1; f_v=%22b954cd2c-d512-11f0-8e9a-0242ac110003%22; show_my_tab=0; browser_push_permission_requested=1769418782; navi=%7B%22homepage%22%3A%22highlights%22%2C%22hottest-widget-time%22%3A%22day%22%7D; pepper_session=%226UR6s0BnIokA1kPGsRM73MjcDHTyvBdgTpwD2YMH%22; xsrf_t=%22WXK5zVNnC9g9FDReAbVgT3eNcfHhCQ2kb7GEI7Pd%22; u_l=0; l_p_u_t_ts=1775920955";
 
 // --- FONCTIONS D'AIDE (HELPERS) ---
 
