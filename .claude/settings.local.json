@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node -e \"const d = require\\('./server/sources/dealabs.json'\\); console.log\\('IDs deals:', d.slice\\(0,10\\).map\\(x=>x.id\\)\\);\")"
-    ]
-  }
-}
